@@ -4,7 +4,9 @@ import (
 	"fmt"
     _ "github.com/lib/pq"
     "database/sql"
-	"time"
+	//"time"
+	//"os"
+	//"net/http"
 )
 
 func initDB() (*sql.DB, error) {
@@ -20,33 +22,42 @@ func initDB() (*sql.DB, error) {
 
 type User struct {
 	email string
-	id int64
-	created int64 // seconds
+	id int
 }
 
 func NewUser(email string) *User {
 	fmt.Printf("Creating user %s\n", email)
 	u := new(User)
 	u.email = email
-	u.created = time.Now().UTC().Unix()
 	return u
 }
 
-func Users(db *sql.DB) ([]User, error) {
+func UserCount(db *sql.DB) int {
+	var count int
+	db.QueryRow("SELECT COUNT(*) FROM users;").Scan(&count)
+	return count
+}
+
+func Users(db *sql.DB) ([]*User, error) {
 	fmt.Printf("Querying for users.\n")
 	rows, err := db.Query("SELECT id, email FROM users;")
 	if err != nil {
 		fmt.Printf("Error querying for users:\n%s\n", err)
 		return nil, err
 	}
-	
+	count := UserCount(db)
+	fmt.Printf("Found %d users.\n", count)
+	var users []*User
 	for rows.Next() {
 		var id int
 		var email string
 		err = rows.Scan(&id, &email)
-		fmt.Printf("%d: %s\n", id, email)
+		user := new(User)
+		user.id = id
+		user.email = email
+		users = append(users, user)
 	}
-	return nil, nil
+	return users, nil
 }
 
 func main() {
@@ -54,6 +65,9 @@ func main() {
 	if err != nil {
 		fmt.Printf("There was an error querying: %s\n", err)
 	}
-	Users(db)
+	users, _ := Users(db)
+	for i :=0; i < len(users); i++ {
+		fmt.Printf("%d: %s\n", users[i].id, users[i].email)
+	}
 	defer db.Close()
 }
