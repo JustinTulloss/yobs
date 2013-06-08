@@ -4,9 +4,8 @@ import (
 	"fmt"
     _ "github.com/lib/pq"
     "database/sql"
-	//"time"
-	//"os"
-	//"net/http"
+    "net/http"
+    "os"
 )
 
 func initDB() (*sql.DB, error) {
@@ -61,13 +60,23 @@ func Users(db *sql.DB) ([]*User, error) {
 }
 
 func main() {
+	http.HandleFunc("/users", users)
+	fmt.Printf("Listening...")
+	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+    if err != nil {
+		panic(err)
+    }
+}
+
+func users(res http.ResponseWriter, req *http.Request) {
 	db, err := initDB()
 	if err != nil {
-		fmt.Printf("There was an error querying: %s\n", err)
+		fmt.Fprintf(res, "There was an error querying: %s\n", err)
 	}
 	users, _ := Users(db)
 	for i :=0; i < len(users); i++ {
-		fmt.Printf("%d: %s\n", users[i].id, users[i].email)
+		fmt.Fprintf(res, "%d: %s\n", users[i].id, users[i].email)
 	}
+	
 	defer db.Close()
 }
