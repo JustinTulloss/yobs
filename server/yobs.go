@@ -177,12 +177,14 @@ func Transactions() *TransactionCollection {
 	return transaction_collection
 }
 
-func Users(db *sql.DB) (*UserCollection, error) {
+func Users() *UserCollection {
 	fmt.Printf("Querying for users.\n")
+	db, err := initDB()
+
 	rows, err := db.Query("SELECT id, facebook_id FROM users;")
 	if err != nil {
 		fmt.Printf("Error querying for users:\n%s\n", err)
-		return nil, err
+		return nil
 	}
 	count := UserCount(db)
 	fmt.Printf("Found %d users.\n", count)
@@ -196,9 +198,10 @@ func Users(db *sql.DB) (*UserCollection, error) {
 		user.Facebook_id = facebook_id
 		users = append(users, user)
 	}
+	defer db.Close()
 	user_collection := new(UserCollection)
 	user_collection.Users = users
-	return user_collection, nil
+	return user_collection
 }
 
 // HTTP handlers
@@ -219,16 +222,10 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 }
 
 func users(res http.ResponseWriter, req *http.Request) {
-	db, err := initDB()
-	if err != nil {
-		fmt.Fprintf(res, "There was an error querying: %s\n", err)
-	}
-	users, _ := Users(db)
+	users := Users()
 	users_json, _ := json.Marshal(users)
 	res.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(res, string(users_json))
-
-	defer db.Close()
 }
 
 func transactions(res http.ResponseWriter, req *http.Request) {
