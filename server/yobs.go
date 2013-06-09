@@ -21,7 +21,7 @@ func initDB() (*sql.DB, error) {
 
 type User struct {
 	email string
-	id int
+	id int64
 }
 
 func NewUser(email string) *User {
@@ -29,6 +29,19 @@ func NewUser(email string) *User {
 	u := new(User)
 	u.email = email
 	return u
+}
+
+func InsertUser(user *User, db *sql.DB) *User {
+	fmt.Printf("Inserting user with email %s\n", user.email)
+	stmt, err := db.Prepare("INSERT INTO users (email) VALUES ($1) RETURNING id;")
+	var id int64
+	err = stmt.QueryRow(user.email).Scan(&id)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
+	user.id = id
+	fmt.Printf("New user has id %d\n", id)
+	return user
 }
 
 func UserCount(db *sql.DB) int {
@@ -48,7 +61,7 @@ func Users(db *sql.DB) ([]*User, error) {
 	fmt.Printf("Found %d users.\n", count)
 	var users []*User
 	for rows.Next() {
-		var id int
+		var id int64
 		var email string
 		err = rows.Scan(&id, &email)
 		user := new(User)
@@ -61,11 +74,26 @@ func Users(db *sql.DB) ([]*User, error) {
 
 func main() {
 	http.HandleFunc("/users", users)
+	http.HandleFunc("/users/new", new_user)
+
 	fmt.Printf("Listening...")
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
     if err != nil {
 		panic(err)
     }
+}
+
+func new_user(res http.ResponseWriter, req *http.Request) {
+	db, _ := initDB()
+	params := req.URL.Query()
+	email := params["email"][0]
+	
+	user := new(User)
+	user.email = email
+	user = InsertUser(user, db)
+
+	fmt.Fprintf(res, "%s", user)
+	defer db.Close()
 }
 
 func users(res http.ResponseWriter, req *http.Request) {
