@@ -40,6 +40,20 @@ func (u User) Transactions() *TransactionCollection {
 	return transaction_coll
 }
 
+func (u User) Insert() User {
+	db, _ := initDB()
+	stmt, err := db.Prepare("INSERT INTO users (facebook_id) VALUES ($1) RETURNING id;")
+	var id int64
+	err = stmt.QueryRow(u.Facebook_id).Scan(&id)
+	defer db.Close()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
+	u.Id = id
+	fmt.Printf("New user has id %d\n", u.Id)
+	return u
+}
+
 type UserCollection struct {
 	Users []*User
 }
@@ -130,19 +144,6 @@ func initDB() (*sql.DB, error) {
 	return db, err
 }
 
-func InsertUser(user *User, db *sql.DB) *User {
-	fmt.Printf("Inserting user with facebook_id %s\n", user.Facebook_id)
-	stmt, err := db.Prepare("INSERT INTO users (facebook_id) VALUES ($1) RETURNING id;")
-	var id int64
-	err = stmt.QueryRow(user.Facebook_id).Scan(&id)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	}
-	user.Id = id
-	fmt.Printf("New user has id %d\n", user.Id)
-	return user
-}
-
 func UserCount(db *sql.DB) int {
 	var count int
 	db.QueryRow("SELECT COUNT(*) FROM users;").Scan(&count)
@@ -181,9 +182,8 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 	facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
 	facebook_id = int64(facebook_id_int)
 	
-	user := new(User)
-	user.Facebook_id = facebook_id
-	user = InsertUser(user, db)
+	result := NewUser(facebook_id)
+	user := result.Insert()
 
 	user_json, _ := json.Marshal(user)
 	res.Header().Set("Content-Type", "application/json")
