@@ -29,6 +29,41 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: transactions; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+CREATE TABLE transactions (
+    id integer NOT NULL,
+    owner_id integer NOT NULL,
+    amount integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE public.transactions OWNER TO dpaola2;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: dpaola2
+--
+
+CREATE SEQUENCE transactions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.transactions_id_seq OWNER TO dpaola2;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: dpaola2
+--
+
+ALTER SEQUENCE transactions_id_seq OWNED BY transactions.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
 --
 
@@ -62,10 +97,10 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dpaola2
+-- Name: id; Type: DEFAULT; Schema: public; Owner: dpaola2
 --
 
-SELECT pg_catalog.setval('users_id_seq', 1, false);
+ALTER TABLE ONLY transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq'::regclass);
 
 
 --
@@ -73,14 +108,6 @@ SELECT pg_catalog.setval('users_id_seq', 1, false);
 --
 
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: dpaola2
---
-
-COPY users (id, facebook_id) FROM stdin;
-\.
 
 
 --
