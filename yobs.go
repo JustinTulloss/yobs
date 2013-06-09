@@ -7,11 +7,16 @@ import (
     "os"
 	"strconv"
 	"encoding/json"
+	"log"
 )
 
 func ToJson(v interface{}) []byte{
 	result, _ := json.MarshalIndent(v, "", "  ")
 	return result
+}
+
+func LogRequest(req *http.Request) {
+	log.Printf("%s %s\n", req.Method, req.URL)
 }
 
 func HasFacebookOrOwnerId(req *http.Request) (bool, string) {
@@ -35,6 +40,7 @@ func HasFacebookOrOwnerId(req *http.Request) (bool, string) {
 
 // HTTP handlers
 func new_user(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
 	params := req.URL.Query()
 	var facebook_id int64
 	facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
@@ -49,6 +55,7 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 }
 
 func users(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
 	res.Header().Set("Content-Type", "application/json")
 	params := req.URL.Query()
 	if len(params["facebook_id"]) > 0 {
@@ -67,6 +74,7 @@ func users(res http.ResponseWriter, req *http.Request) {
 }
 
 func transactions(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
 	res.Header().Set("Content-Type", "application/json")
 	params := req.URL.Query()
 	if len(params["facebook_id"]) > 0 {
@@ -84,6 +92,7 @@ func transactions(res http.ResponseWriter, req *http.Request) {
 }
 
 func new_transaction(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
 	res.Header().Set("Content-Type", "application/json")
 	params := req.URL.Query()
 	valid, key := HasFacebookOrOwnerId(req)
@@ -135,7 +144,7 @@ func main() {
 	http.HandleFunc("/transactions", transactions)
 	http.HandleFunc("/transactions/new", new_transaction)
 
-	fmt.Printf("Listening on localhost:%s...\n", os.Getenv("PORT"))
+	log.Printf("Listening on localhost:%s...\n", os.Getenv("PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
     if err != nil {
 		panic(err)

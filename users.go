@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
     "database/sql"
 )
 
@@ -14,7 +14,7 @@ func (u User) Transactions() *TransactionCollection {
 	db, _ := initDB()
 	stmt, err := db.Prepare("SELECT id, owner_id, amount, description FROM transactions WHERE owner_id = $1;")
 	if err != nil {
-		fmt.Printf("%s\n",err)
+		log.Panic(err)
 	}
 	rows, _ := stmt.Query(u.Id)
 	var transactions []*Transaction
@@ -44,10 +44,10 @@ func (u User) Insert() User {
 	err = stmt.QueryRow(u.Facebook_id).Scan(&id)
 	defer db.Close()
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Panic(err)
 	}
 	u.Id = id
-	fmt.Printf("New user has id %d\n", u.Id)
+	log.Printf("Created user: <%d, facebook_id: %d>\n", u.Id, u.Facebook_id)
 	return u
 }
 
@@ -57,7 +57,6 @@ type UserCollection struct {
 
 
 func NewUser(facebook_id int64) *User {
-	fmt.Printf("Creating user %s\n", facebook_id)
 	u := new(User)
 	u.Facebook_id = facebook_id
 	return u
@@ -68,7 +67,7 @@ func UserExists(user_id int64) bool {
 	stmt, _ := db.Prepare("SELECT id FROM users WHERE id = $1;")
 	result, err := stmt.Exec(user_id)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Panic(err)
 	}
 	rows_affected, _ := result.RowsAffected()
 	defer db.Close()
@@ -85,16 +84,11 @@ func UserCount(db *sql.DB) int {
 }
 
 func Users() *UserCollection {
-	fmt.Printf("Querying for users.\n")
 	db, err := initDB()
-
 	rows, err := db.Query("SELECT id, facebook_id FROM users;")
 	if err != nil {
-		fmt.Printf("Error querying for users:\n%s\n", err)
-		return nil
+		log.Panic(err)
 	}
-	count := UserCount(db)
-	fmt.Printf("Found %d users.\n", count)
 	var users []*User
 	for rows.Next() {
 		var id int64

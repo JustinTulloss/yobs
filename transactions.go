@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 )
 
 type Transaction struct {
@@ -13,16 +13,15 @@ type Transaction struct {
 
 func (t Transaction) Insert() Transaction {
 	db, _ := initDB()
-	fmt.Printf("Inserting transaction...")
 	stmt, err := db.Prepare("INSERT INTO transactions (owner_id, amount, description) VALUES ($1, $2, $3) RETURNING id;")
 	var id int64
 	err = stmt.QueryRow(t.Owner_id, t.Amount, t.Description).Scan(&id)
 	defer db.Close()
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Panic(err)
 	}
 	t.Id = id
-	fmt.Printf("New Transaction inserted: %d\n", t.Id)
+	log.Printf("Created Transaction: %d\n", t.Id)
 	return t
 }
 
@@ -49,7 +48,6 @@ func NewTransactionByFB(facebook_id int64, amount int64, description string) (*T
 }
 
 func NewTransaction(owner_id int64, amount int64, description string) (*Transaction, error ){
-	fmt.Printf("Creating transaction.\n")
 	if !UserExists(owner_id) {
 		return nil, nil
 	}
@@ -66,7 +64,7 @@ func Transactions() *TransactionCollection {
 
 	rows, err := db.Query("SELECT id, owner_id, amount, description FROM transactions;")
 	if err != nil {
-		fmt.Printf("Error querying for transactions: %s\n", err)
+		log.Panic(err)
 	}
 	defer db.Close()
 	var transactions []*Transaction
