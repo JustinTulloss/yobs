@@ -62,12 +62,22 @@ func user(res http.ResponseWriter, req *http.Request) {
 		// facebook id is present
 		facebook_id := int64(facebook_id_int)
 		user := UserFromFB(facebook_id)
+		if user.Id == 0 {
+			// no such user
+			NoSuchUser(res)
+			return
+		}
 		user_json := ToJson(user)
 		fmt.Fprintf(res, string(user_json))
 	} else if len(params["id"]) > 0 {
 		owner_id_int, _ := strconv.Atoi(params["id"][0])
 		owner_id := int64(owner_id_int)
 		user := UserFromID(owner_id)
+		if user.Facebook_id == 0 {
+			// no such user
+			NoSuchUser(res)
+			return
+		}
 		user_json := ToJson(user)
 		fmt.Fprintf(res, string(user_json))
 	} else {
@@ -79,12 +89,28 @@ func user(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func NoSuchUser(res http.ResponseWriter) {
+	var message = map[string] string {
+		"error" : "No such user.",
+	}
+	message_json := ToJson(message)
+	fmt.Fprintf(res, string(message_json))
+}
+
 func users(res http.ResponseWriter, req *http.Request) {
 	LogRequest(req)
 	res.Header().Set("Content-Type", "application/json")
 	users := Users()
 	users_json := ToJson(users)
 	fmt.Fprintf(res, string(users_json))
+}
+
+func NoSuchTransaction(res http.ResponseWriter) {
+	var message = map[string] string {
+		"error" : "No such transaction",
+	}
+	message_json := ToJson(message)
+	fmt.Fprintf(res, string(message_json))
 }
 
 func transaction(res http.ResponseWriter, req *http.Request) {
@@ -95,6 +121,11 @@ func transaction(res http.ResponseWriter, req *http.Request) {
 		id_int, _ := strconv.Atoi(params["id"][0])
 		id := int64(id_int)
 		transaction := TransactionFromID(id)
+		if transaction.Owner_id == 0 {
+			// no such transaction
+			NoSuchTransaction(res)
+			return
+		}
 		t_json := ToJson(transaction)
 		fmt.Fprintf(res, string(t_json))
 	} else {

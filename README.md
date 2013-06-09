@@ -33,7 +33,7 @@ Returns:
 ```
 
 ### /user
-Retrieve the user with the given `facebook_id` (which is required). If the user does not exist, the facebook_id will have a value of 0.
+Retrieve the user with the given `facebook_id` (which is required).
 
 Returns:
 

@@ -96,7 +96,7 @@ func TransactionFromID(id int64) *Transaction {
 	defer db.Close()
 	t := new(Transaction)
 	t.Id = id
-	t.Owner_id = id
+	t.Owner_id = owner_id
 	t.Amount = amount
 	t.Description = description
 	return t
