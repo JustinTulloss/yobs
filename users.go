@@ -12,7 +12,10 @@ type User struct {
 
 func (u User) Transactions() *TransactionCollection {
 	db, _ := initDB()
-	stmt, _ := db.Prepare("SELECT id, owner_id, amount, description FROM transactions WHERE owner_id = '$1';")
+	stmt, err := db.Prepare("SELECT id, owner_id, amount, description FROM transactions WHERE owner_id = $1;")
+	if err != nil {
+		fmt.Printf("%s\n",err)
+	}
 	rows, _ := stmt.Query(u.Id)
 	var transactions []*Transaction
 	for rows.Next() {

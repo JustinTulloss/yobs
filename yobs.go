@@ -45,10 +45,20 @@ func users(res http.ResponseWriter, req *http.Request) {
 }
 
 func transactions(res http.ResponseWriter, req *http.Request) {
-	transactions := Transactions()
-	t_json, _ := json.Marshal(transactions)
 	res.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(res, string(t_json))
+	params := req.URL.Query()
+	if len(params["facebook_id"]) > 0 {
+		facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
+		facebook_id := int64(facebook_id_int)
+		user := UserFromFB(facebook_id)
+		transactions := user.Transactions()
+		t_json, _ := json.Marshal(transactions)
+		fmt.Fprintf(res, string(t_json))
+	} else {
+		transactions := Transactions()
+		t_json, _ := json.Marshal(transactions)
+		fmt.Fprintf(res, string(t_json))
+	}
 }
 
 func new_transaction(res http.ResponseWriter, req *http.Request) {
