@@ -7,6 +7,7 @@ import (
     "net/http"
     "os"
 	"strconv"
+	"encoding/json"
 )
 
 func initDB() (*sql.DB, error) {
@@ -21,26 +22,30 @@ func initDB() (*sql.DB, error) {
 }
 
 type User struct {
-	facebook_id int64
-	id int64
+	Facebook_id int64
+	Id int64
+}
+
+type UserCollection struct {
+	Users []*User
 }
 
 func NewUser(facebook_id int64) *User {
 	fmt.Printf("Creating user %s\n", facebook_id)
 	u := new(User)
-	u.facebook_id = facebook_id
+	u.Facebook_id = facebook_id
 	return u
 }
 
 func InsertUser(user *User, db *sql.DB) *User {
-	fmt.Printf("Inserting user with facebook_id %s\n", user.facebook_id)
+	fmt.Printf("Inserting user with facebook_id %s\n", user.Facebook_id)
 	stmt, err := db.Prepare("INSERT INTO users (facebook_id) VALUES ($1) RETURNING id;")
 	var id int64
-	err = stmt.QueryRow(user.facebook_id).Scan(&id)
+	err = stmt.QueryRow(user.Facebook_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 	}
-	user.id = id
+	user.Id = id
 	fmt.Printf("New user has id %d\n", id)
 	return user
 }
@@ -66,8 +71,8 @@ func Users(db *sql.DB) ([]*User, error) {
 		var facebook_id int64
 		err = rows.Scan(&id, &facebook_id)
 		user := new(User)
-		user.id = id
-		user.facebook_id = facebook_id
+		user.Id = id
+		user.Facebook_id = facebook_id
 		users = append(users, user)
 	}
 	return users, nil
@@ -92,10 +97,12 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 	facebook_id = int64(facebook_id_int)
 	
 	user := new(User)
-	user.facebook_id = facebook_id
+	user.Facebook_id = facebook_id
 	user = InsertUser(user, db)
 
-	fmt.Fprintf(res, "%s", user)
+	user_json, _ := json.Marshal(user)
+	res.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(res, string(user_json))
 	defer db.Close()
 }
 
@@ -105,9 +112,11 @@ func users(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(res, "There was an error querying: %s\n", err)
 	}
 	users, _ := Users(db)
-	for i :=0; i < len(users); i++ {
-		fmt.Fprintf(res, "%d: %d\n", users[i].id, users[i].facebook_id)
-	}
-	
+	user_collection := new(UserCollection)
+	user_collection.Users = users
+	users_json, _ := json.Marshal(user_collection)
+	res.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(res, string(users_json))
+
 	defer db.Close()
 }
