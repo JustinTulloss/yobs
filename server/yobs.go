@@ -10,17 +10,7 @@ import (
 	"encoding/json"
 )
 
-func initDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", "dbname=yobs sslmode=disable")
-	if err != nil {
-		fmt.Printf("Error opening DB connection:\n%s\n", err)
-		return db, err
-	} else {
-		fmt.Printf("Connected to database.\n")
-	}
-	return db, err
-}
-
+// Models
 type User struct {
 	Facebook_id int64
 	Id int64
@@ -35,6 +25,18 @@ func NewUser(facebook_id int64) *User {
 	u := new(User)
 	u.Facebook_id = facebook_id
 	return u
+}
+
+// Database Interaction
+func initDB() (*sql.DB, error) {
+	db, err := sql.Open("postgres", "dbname=yobs sslmode=disable")
+	if err != nil {
+		fmt.Printf("Error opening DB connection:\n%s\n", err)
+		return db, err
+	} else {
+		fmt.Printf("Connected to database.\n")
+	}
+	return db, err
 }
 
 func InsertUser(user *User, db *sql.DB) *User {
@@ -56,7 +58,7 @@ func UserCount(db *sql.DB) int {
 	return count
 }
 
-func Users(db *sql.DB) ([]*User, error) {
+func Users(db *sql.DB) (*UserCollection, error) {
 	fmt.Printf("Querying for users.\n")
 	rows, err := db.Query("SELECT id, facebook_id FROM users;")
 	if err != nil {
@@ -75,20 +77,12 @@ func Users(db *sql.DB) ([]*User, error) {
 		user.Facebook_id = facebook_id
 		users = append(users, user)
 	}
-	return users, nil
+	user_collection := new(UserCollection)
+	user_collection.Users = users
+	return user_collection, nil
 }
 
-func main() {
-	http.HandleFunc("/users", users)
-	http.HandleFunc("/users/new", new_user)
-
-	fmt.Printf("Listening...")
-	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
-    if err != nil {
-		panic(err)
-    }
-}
-
+// HTTP handlers
 func new_user(res http.ResponseWriter, req *http.Request) {
 	db, _ := initDB()
 	params := req.URL.Query()
@@ -112,11 +106,21 @@ func users(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(res, "There was an error querying: %s\n", err)
 	}
 	users, _ := Users(db)
-	user_collection := new(UserCollection)
-	user_collection.Users = users
-	users_json, _ := json.Marshal(user_collection)
+	users_json, _ := json.Marshal(users)
 	res.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(res, string(users_json))
 
 	defer db.Close()
+}
+
+// entry point
+func main() {
+	http.HandleFunc("/users", users)
+	http.HandleFunc("/users/new", new_user)
+
+	fmt.Printf("Listening...")
+	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+    if err != nil {
+		panic(err)
+    }
 }
