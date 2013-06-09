@@ -1,3 +1,4 @@
 #!/bin/sh
 
-PORT=5000 go run yobs.go
+go install yobs
+PORT=5000 yobs
