@@ -1,10 +1,28 @@
 "use strict";
 
-angular.module('yobs').factory('facebook', ['$window', '$rootScope', function($window, $rootScope) {
+angular.module('yobs').factory('facebook', ['$window', '$rootScope', '$q', function($window, $rootScope, $q) {
   var scope = $rootScope.$new()
+  var noop = function() {};
   var module = {
     scope: scope,
-    parseXFBML: function() { }
+    parseXFBML: noop,
+    friends: function(fields) {
+      var deferred = $q.defer();
+      FB.api('/me/friends', {
+          fields: fields.join(',')
+      }, function(response) {
+        if (response.error) {
+          $rootScope.$apply(function() {
+            deferred.reject(response.error);
+          });
+        } else {
+          $rootScope.$apply(function() {
+            deferred.resolve(response.data);
+          });
+        }
+      });
+      return deferred.promise;
+    }
   };
   scope.user = null;
   scope.status = 'loading';

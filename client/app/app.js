@@ -1,3 +1,3 @@
 "use strict";
 
-angular.module('yobs', []);
+angular.module('yobs', ['ui.bootstrap']);
