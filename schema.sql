@@ -29,13 +29,24 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+CREATE TABLE schema_migrations (
+    version character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.schema_migrations OWNER TO dpaola2;
+
+--
 -- Name: transactions; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
 --
 
 CREATE TABLE transactions (
     id integer NOT NULL,
     owner_id integer NOT NULL,
-    amount integer NOT NULL,
+    amount integer DEFAULT 0 NOT NULL,
     description text
 );
 
@@ -111,11 +122,26 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 
 
 --
--- Name: users_facebook_id_key; Type: CONSTRAINT; Schema: public; Owner: dpaola2; Tablespace: 
+-- Name: transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+ALTER TABLE ONLY transactions
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: dpaola2; Tablespace: 
 --
 
 ALTER TABLE ONLY users
-    ADD CONSTRAINT users_facebook_id_key UNIQUE (facebook_id);
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (version);
 
 
 --

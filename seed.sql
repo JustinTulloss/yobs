@@ -14,7 +14,7 @@ SET search_path = public, pg_catalog;
 -- Name: transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dpaola2
 --
 
-SELECT pg_catalog.setval('transactions_id_seq', 2, true);
+SELECT pg_catalog.setval('transactions_id_seq', 3, true);
 
 
 --
@@ -30,6 +30,7 @@ SELECT pg_catalog.setval('users_id_seq', 3, true);
 
 INSERT INTO transactions (id, owner_id, amount, description) VALUES (1, 1, 5000, 'dinner with friends');
 INSERT INTO transactions (id, owner_id, amount, description) VALUES (2, 1, 10000, 'vegas vacation');
+INSERT INTO transactions (id, owner_id, amount, description) VALUES (3, 1, 0, 'transaction via facebook id, woot!');
 
 
 --

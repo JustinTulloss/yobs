@@ -2,11 +2,11 @@
 
 ### To get set up
 
-1. `$ go install yobs`
-2. `$ createdb yobs`
-3. `$ psql yobs < schema.sql`
-4. `$ psql yobs < seed.sql`
-5. `$ PORT=5000 yobs`
+1. Install the prequisites: `$ gem install rails` (We use ActiveRecord for database migrations, see [more details here](http://blog.aizatto.com/2007/05/27/activerecord-migrations-without-rails/))
+2. Create the database: `$ createdb yobs`
+3. Run the migrations: `$ rake`
+4. Seed the database: `$ psql yobs < seed.sql`
+5. Start the server: `$ ./serve.sh`
 
 
 ## API endpoints
