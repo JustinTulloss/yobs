@@ -85,3 +85,19 @@ func Transactions() *TransactionCollection {
 	transaction_collection.Transactions = transactions
 	return transaction_collection
 }
+
+func TransactionFromID(id int64) *Transaction {
+	db, _ := initDB()
+	stmt, _ := db.Prepare("SELECT id, owner_id, amount, description FROM transactions WHERE id = $1;")
+	var owner_id int64
+	var amount int64
+	var description string
+	stmt.QueryRow(id).Scan(&id, &owner_id, &amount, &description)
+	defer db.Close()
+	t := new(Transaction)
+	t.Id = id
+	t.Owner_id = id
+	t.Amount = amount
+	t.Description = description
+	return t
+}

@@ -87,6 +87,26 @@ func users(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(res, string(users_json))
 }
 
+func transaction(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
+	res.Header().Set("Content-Type", "application/json")
+	params := req.URL.Query()
+	if len(params["id"]) > 0 {
+		id_int, _ := strconv.Atoi(params["id"][0])
+		id := int64(id_int)
+		transaction := TransactionFromID(id)
+		t_json := ToJson(transaction)
+		fmt.Fprintf(res, string(t_json))
+	} else {
+		// missing ID parameter
+		var errors = map[string] string {
+			"error" : "Missing id",
+		}
+		e_json := ToJson(errors)
+		fmt.Fprintf(res, string(e_json))
+	}
+}
+
 func transactions(res http.ResponseWriter, req *http.Request) {
 	LogRequest(req)
 	res.Header().Set("Content-Type", "application/json")
@@ -157,6 +177,7 @@ func main() {
 	http.HandleFunc("/users/new", new_user)
 
 	http.HandleFunc("/transactions", transactions)
+	http.HandleFunc("/transaction", transaction)
 	http.HandleFunc("/transactions/new", new_transaction)
 
 	log.Printf("Listening on localhost:%s...\n", os.Getenv("PORT"))

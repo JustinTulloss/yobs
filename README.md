@@ -76,7 +76,18 @@ Returns:
 ```
 
 ### /transaction
-TODO
+Retrieve the transaction with the given ID (required).
+
+Returns:
+
+```
+{
+  "Id": <int>,
+  "Owner_id": <int>,
+  "Amount": <int>,
+  "Description": <string>
+}
+```
 
 ### /transactions/new
 Create a new transaction with an associated owner. Either `owner_id` or `facebook_id` is required (passing both will result in an error). You must also pass an `amount`, but `description` is **optional**.
