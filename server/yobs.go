@@ -150,6 +150,33 @@ func UserCount(db *sql.DB) int {
 	return count
 }
 
+func Transactions() *TransactionCollection {
+	db, _ := initDB()
+
+	rows, err := db.Query("SELECT id, owner_id, amount, description FROM transactions;")
+	if err != nil {
+		fmt.Printf("Error querying for transactions: %s\n", err)
+	}
+	defer db.Close()
+	var transactions []*Transaction
+	for rows.Next() {
+		var id int64
+		var owner_id int64
+		var amount int64
+		var description string
+		rows.Scan(&id, &owner_id, &amount, &description)
+		transaction := new(Transaction)
+		transaction.Id = id
+		transaction.Owner_id = owner_id
+		transaction.Amount = amount
+		transaction.Description = description
+		transactions = append(transactions, transaction)
+	}
+	transaction_collection := new(TransactionCollection)
+	transaction_collection.Transactions = transactions
+	return transaction_collection
+}
+
 func Users(db *sql.DB) (*UserCollection, error) {
 	fmt.Printf("Querying for users.\n")
 	rows, err := db.Query("SELECT id, facebook_id FROM users;")
@@ -204,6 +231,13 @@ func users(res http.ResponseWriter, req *http.Request) {
 	defer db.Close()
 }
 
+func transactions(res http.ResponseWriter, req *http.Request) {
+	transactions := Transactions()
+	t_json, _ := json.Marshal(transactions)
+	res.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(res, string(t_json))
+}
+
 func new_transaction(res http.ResponseWriter, req *http.Request) {
 	params := req.URL.Query()
 	var owner_id int64
@@ -230,6 +264,7 @@ func main() {
 	http.HandleFunc("/users", users)
 	http.HandleFunc("/users/new", new_user)
 
+	http.HandleFunc("/transactions", transactions)
 	http.HandleFunc("/transactions/new", new_transaction)
 
 	fmt.Printf("Listening...")
