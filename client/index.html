@@ -2,26 +2,44 @@
 <html ng-app="yobs">
     <head>
         <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/built/style.css">
         <script type="text/javascript" src="/components/angular/angular.min.js"></script>
         <script type="text/javascript" src="/components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
         <script type="text/javascript" src="/app/app.js"></script>
         <script type="text/javascript" src="/app/fb-service.js"></script>
         <script type="text/javascript" src="/app/login.js"></script>
+        <script type="text/javascript" src="/app/transaction.js"></script>
     </head>
     <body>
         <div id="fb-root"></div>
-        <div ng-controller="LoginCtrl">
-            <div ng-switch on="fbStatus">
-                <div ng-switch-when="connected">
-                  Hello {{ name }}!
-                </div>
-                <div ng-switch-when="disconnected">
-                    <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
-                </div>
-                <div ng-switch-when="loading">
-                    Loading...
+        <header class="clearfix">
+            <div class="login-button" ng-controller="LoginCtrl">
+                <div ng-switch on="fbStatus">
+                    <div ng-switch-when="connected">
+                      Hello {{ name }}!
+                    </div>
+                    <div ng-switch-when="disconnected">
+                        <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+                    </div>
+                    <div ng-switch-when="loading">
+                        Loading...
+                    </div>
                 </div>
             </div>
-        </div>
+        </header>
+        <section class="content">
+            <div class="transaction-add" ng-controller="NewTxnCtrl">
+                <form>
+                    <fieldset>
+                        <legend>Enter a new transaction</legend>
+                        <label for="amount">Amount</label>
+                        <input id="amount" type="text" placeholder="Ex. $20.00" />
+                        <label for="friends">Split between who?</label>
+                        <input id="friends" type="text" placeholder="Search for Facebook friends" />
+                        <button type="submit" class="btn">Add Transaction</button>
+                    </fieldset>
+                </form>
+            </div>
+        </section>
     </body>
 </html>
