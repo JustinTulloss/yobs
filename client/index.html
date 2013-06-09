@@ -35,7 +35,14 @@
                         <label for="amount">Amount</label>
                         <input id="amount" type="text" placeholder="Ex. $20.00" />
                         <label for="friends">Split between who?</label>
-                        <input id="friends" type="text" placeholder="Search for Facebook friends" />
+                        <input id="friends" type="text" placeholder="Search for Facebook friends" ng-model="filter.name" />
+                        <div ng-switch on="fbStatus">
+                            <ul ng-switch-when="connected">
+                                <li ng-repeat="friend in friends | filter:filter | orderBy:'name'">
+                                    {{ friend.name }}
+                                </li>
+                            </ul>
+                        </div>
                         <button type="submit" class="btn">Add Transaction</button>
                     </fieldset>
                 </form>
