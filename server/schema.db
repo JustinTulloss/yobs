@@ -34,7 +34,7 @@ SET default_with_oids = false;
 
 CREATE TABLE users (
     id integer NOT NULL,
-    email character varying(255)
+    facebook_id integer NOT NULL
 );
 
 
@@ -65,7 +65,7 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dpaola2
 --
 
-SELECT pg_catalog.setval('users_id_seq', 2, true);
+SELECT pg_catalog.setval('users_id_seq', 1, false);
 
 
 --
@@ -79,10 +79,16 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: dpaola2
 --
 
-COPY users (id, email) FROM stdin;
-1	dpaola2@gmail.com
-2	jmtulloss@gmail.com
+COPY users (id, facebook_id) FROM stdin;
 \.
+
+
+--
+-- Name: users_facebook_id_key; Type: CONSTRAINT; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_facebook_id_key UNIQUE (facebook_id);
 
 
 --

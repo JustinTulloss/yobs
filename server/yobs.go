@@ -6,6 +6,7 @@ import (
     "database/sql"
     "net/http"
     "os"
+	"strconv"
 )
 
 func initDB() (*sql.DB, error) {
@@ -20,22 +21,22 @@ func initDB() (*sql.DB, error) {
 }
 
 type User struct {
-	email string
+	facebook_id int64
 	id int64
 }
 
-func NewUser(email string) *User {
-	fmt.Printf("Creating user %s\n", email)
+func NewUser(facebook_id int64) *User {
+	fmt.Printf("Creating user %s\n", facebook_id)
 	u := new(User)
-	u.email = email
+	u.facebook_id = facebook_id
 	return u
 }
 
 func InsertUser(user *User, db *sql.DB) *User {
-	fmt.Printf("Inserting user with email %s\n", user.email)
-	stmt, err := db.Prepare("INSERT INTO users (email) VALUES ($1) RETURNING id;")
+	fmt.Printf("Inserting user with facebook_id %s\n", user.facebook_id)
+	stmt, err := db.Prepare("INSERT INTO users (facebook_id) VALUES ($1) RETURNING id;")
 	var id int64
-	err = stmt.QueryRow(user.email).Scan(&id)
+	err = stmt.QueryRow(user.facebook_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 	}
@@ -52,7 +53,7 @@ func UserCount(db *sql.DB) int {
 
 func Users(db *sql.DB) ([]*User, error) {
 	fmt.Printf("Querying for users.\n")
-	rows, err := db.Query("SELECT id, email FROM users;")
+	rows, err := db.Query("SELECT id, facebook_id FROM users;")
 	if err != nil {
 		fmt.Printf("Error querying for users:\n%s\n", err)
 		return nil, err
@@ -62,11 +63,11 @@ func Users(db *sql.DB) ([]*User, error) {
 	var users []*User
 	for rows.Next() {
 		var id int64
-		var email string
-		err = rows.Scan(&id, &email)
+		var facebook_id int64
+		err = rows.Scan(&id, &facebook_id)
 		user := new(User)
 		user.id = id
-		user.email = email
+		user.facebook_id = facebook_id
 		users = append(users, user)
 	}
 	return users, nil
@@ -86,10 +87,12 @@ func main() {
 func new_user(res http.ResponseWriter, req *http.Request) {
 	db, _ := initDB()
 	params := req.URL.Query()
-	email := params["email"][0]
+	var facebook_id int64
+	facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
+	facebook_id = int64(facebook_id_int)
 	
 	user := new(User)
-	user.email = email
+	user.facebook_id = facebook_id
 	user = InsertUser(user, db)
 
 	fmt.Fprintf(res, "%s", user)
@@ -103,7 +106,7 @@ func users(res http.ResponseWriter, req *http.Request) {
 	}
 	users, _ := Users(db)
 	for i :=0; i < len(users); i++ {
-		fmt.Fprintf(res, "%d: %s\n", users[i].id, users[i].email)
+		fmt.Fprintf(res, "%d: %d\n", users[i].id, users[i].facebook_id)
 	}
 	
 	defer db.Close()
