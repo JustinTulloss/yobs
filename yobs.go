@@ -9,6 +9,11 @@ import (
 	"encoding/json"
 )
 
+func ToJson(v interface{}) []byte{
+	result, _ := json.MarshalIndent(v, "", "  ")
+	return result
+}
+
 func HasFacebookOrOwnerId(req *http.Request) (bool, string) {
 	params := req.URL.Query()
 	if len(params["facebook_id"]) < 1 {
@@ -38,7 +43,7 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 	result := NewUser(facebook_id)
 	user := result.Insert()
 
-	user_json, _ := json.Marshal(user)
+	user_json := ToJson(user)
 	res.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(res, string(user_json))
 }
@@ -51,12 +56,12 @@ func users(res http.ResponseWriter, req *http.Request) {
 		// facebook id is present
 		facebook_id := int64(facebook_id_int)
 		user := UserFromFB(facebook_id)
-		user_json, _ := json.Marshal(user)
+		user_json := ToJson(user)
 		fmt.Fprintf(res, string(user_json))
 	} else {
 		// no facebook id, give back all users
 		users := Users()
-		users_json, _ := json.Marshal(users)
+		users_json := ToJson(users)
 		fmt.Fprintf(res, string(users_json))
 	}
 }
@@ -69,11 +74,11 @@ func transactions(res http.ResponseWriter, req *http.Request) {
 		facebook_id := int64(facebook_id_int)
 		user := UserFromFB(facebook_id)
 		transactions := user.Transactions()
-		t_json, _ := json.Marshal(transactions)
+		t_json := ToJson(transactions)
 		fmt.Fprintf(res, string(t_json))
 	} else {
 		transactions := Transactions()
-		t_json, _ := json.Marshal(transactions)
+		t_json := ToJson(transactions)
 		fmt.Fprintf(res, string(t_json))
 	}
 }
@@ -86,7 +91,7 @@ func new_transaction(res http.ResponseWriter, req *http.Request) {
 		var errors = map[string] string {
 			"error" : "Missing facebook_id or owner_id",
 		}
-		e_json, _ := json.Marshal(errors)
+		e_json := ToJson(errors)
 		fmt.Fprintf(res, string(e_json))
 		return
 	} 
@@ -118,7 +123,7 @@ func new_transaction(res http.ResponseWriter, req *http.Request) {
 		result, _ = NewTransaction(owner_id, amount, description)
 	}
 	transaction := result.Insert()
-	t_json, _ := json.Marshal(transaction)
+	t_json := ToJson(transaction)
 	fmt.Fprintf(res, string(t_json))
 }
 
