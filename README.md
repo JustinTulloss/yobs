@@ -1,3 +1,21 @@
+# Yet Another Bill Splitter
+
+### To get set up
+
+1. `$ go get`
+2. `$ createdb yobs`
+3. `$ psql yobs < schema.sql`
+4. `$ psql yobs < seed.sql`
+5. `$ PORT=5000 yobs`
+
+
+## API endpoints
+
+* `/users`
+* `/users/new?facebook_id=1932106`
+* `/transactions`
+* `/transactions/new?owner_id=4&amount=10000&description=foobar`
+
 ### Schema
 
 * Users
