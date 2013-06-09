@@ -2,7 +2,7 @@
 
 ### To get set up
 
-1. `$ go get`
+1. `$ go install yobs`
 2. `$ createdb yobs`
 3. `$ psql yobs < schema.sql`
 4. `$ psql yobs < seed.sql`
