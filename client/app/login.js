@@ -1,7 +1,13 @@
 "use strict";
 
 angular.module('yobs').factory('facebook', ['$window', '$rootScope', function($window, $rootScope) {
-    var user = {};
+    var scope = $rootScope.$new()
+    var module = {
+      scope: scope
+    };
+    scope.user = null;
+    scope.status = 'loading';
+
     $window.fbAsyncInit = function() {
       FB.init({
         appId      : '470078866407798', // App ID
@@ -23,14 +29,21 @@ angular.module('yobs').factory('facebook', ['$window', '$rootScope', function($w
           // login status of the person. In this case, we're handling the situation where they 
           // have logged in to the app.
           FB.api('/me', function(response) {
-            $rootScope.$apply(function() {
-              user = response;
+            scope.$apply(function() {
+              scope.user = response;
+              scope.status = 'connected';
             });
           });
         } else if (response.status === 'not_authorized') {
           // In this case, the person is logged into Facebook, but not into the app,
+          scope.$apply(function() {
+            module.status = 'disconnected';
+          });
         } else {
           // In this case, the person is not logged into Facebook.
+          scope.$apply(function() {
+            module.status = 'disconnected';
+          });
         }
       });
     };
@@ -44,11 +57,16 @@ angular.module('yobs').factory('facebook', ['$window', '$rootScope', function($w
        ref.parentNode.insertBefore(js, ref);
      }($window.document));
 
-    return {
-      user: function() {
-        return user;
-      }
-    };
+    return module;
 }]);
+
+angular.module('yobs').controller('LoginCtrl', function($scope, facebook) {
+  facebook.scope.$watch('status', function(status) {
+    $scope.fbStatus = status;
+  });
+  facebook.scope.$watch('user', function(user) {
+    $scope.name = user ? user.name : "";
+  });
+});
 
 //angular.injector([fbServiceModule]).get('facebook');

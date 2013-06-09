@@ -13,9 +13,18 @@
     </head>
     <body>
         <div id="fb-root"></div>
-        <div ng-controller="ProfileCtrl">
-          Hello {{ user().name }}!
+        <div ng-controller="LoginCtrl">
+            <div ng-switch on="fbStatus">
+                <div ng-switch-when="connected">
+                  Hello {{ name }}!
+                </div>
+                <div ng-switch-when="disconnected">
+                    <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+                </div>
+                <div ng-switch-when="loading">
+                    Loading...
+                </div>
+            </div>
         </div>
-        <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
     </body>
 </html>
