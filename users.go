@@ -116,3 +116,15 @@ func UserFromFB(facebook_id int64) *User {
 	defer db.Close()
 	return user
 }
+
+func UserFromID(owner_id int64) *User {
+	db, _ := initDB()
+	stmt, _ := db.Prepare("SELECT facebook_id FROM users WHERE id = $1")
+	var facebook_id int64
+	stmt.QueryRow(owner_id).Scan(&facebook_id)
+	user := new(User)
+	user.Id = owner_id
+	user.Facebook_id = facebook_id
+	defer db.Close()
+	return user	
+}

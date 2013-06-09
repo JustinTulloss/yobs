@@ -54,9 +54,8 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(res, string(user_json))
 }
 
-func users(res http.ResponseWriter, req *http.Request) {
+func user(res http.ResponseWriter, req *http.Request) {
 	LogRequest(req)
-	res.Header().Set("Content-Type", "application/json")
 	params := req.URL.Query()
 	if len(params["facebook_id"]) > 0 {
 		facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
@@ -65,12 +64,27 @@ func users(res http.ResponseWriter, req *http.Request) {
 		user := UserFromFB(facebook_id)
 		user_json := ToJson(user)
 		fmt.Fprintf(res, string(user_json))
+	} else if len(params["id"]) > 0 {
+		owner_id_int, _ := strconv.Atoi(params["id"][0])
+		owner_id := int64(owner_id_int)
+		user := UserFromID(owner_id)
+		user_json := ToJson(user)
+		fmt.Fprintf(res, string(user_json))
 	} else {
-		// no facebook id, give back all users
-		users := Users()
-		users_json := ToJson(users)
-		fmt.Fprintf(res, string(users_json))
+		var errors = map[string] string {
+			"error" : "Missing facebook_id or id",
+		}
+		e_json := ToJson(errors)
+		fmt.Fprintf(res, string(e_json))
 	}
+}
+
+func users(res http.ResponseWriter, req *http.Request) {
+	LogRequest(req)
+	res.Header().Set("Content-Type", "application/json")
+	users := Users()
+	users_json := ToJson(users)
+	fmt.Fprintf(res, string(users_json))
 }
 
 func transactions(res http.ResponseWriter, req *http.Request) {
@@ -139,6 +153,7 @@ func new_transaction(res http.ResponseWriter, req *http.Request) {
 // entry point
 func main() {
 	http.HandleFunc("/users", users)
+	http.HandleFunc("/user", user)
 	http.HandleFunc("/users/new", new_user)
 
 	http.HandleFunc("/transactions", transactions)
