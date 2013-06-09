@@ -1,3 +1,10 @@
+package yobs
+
+import (
+	"fmt"
+    "database/sql"
+)
+
 type User struct {
 	Facebook_id int64
 	Id int64

@@ -1,4 +1,5 @@
-package main
+package yobs
+
 import (
 	"fmt"
     _ "github.com/lib/pq"

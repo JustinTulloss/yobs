@@ -1,3 +1,8 @@
+package yobs
+
+import (
+	"fmt"
+)
 
 type Transaction struct {
 	Id int64
