@@ -29,6 +29,41 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: transactions; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
+--
+
+CREATE TABLE transactions (
+    id integer NOT NULL,
+    owner_id integer NOT NULL,
+    amount integer NOT NULL,
+    description text
+);
+
+
+ALTER TABLE public.transactions OWNER TO dpaola2;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: dpaola2
+--
+
+CREATE SEQUENCE transactions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.transactions_id_seq OWNER TO dpaola2;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: dpaola2
+--
+
+ALTER SEQUENCE transactions_id_seq OWNED BY transactions.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: dpaola2; Tablespace: 
 --
 
@@ -59,6 +94,13 @@ ALTER TABLE public.users_id_seq OWNER TO dpaola2;
 --
 
 ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: dpaola2
+--
+
+ALTER TABLE ONLY transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq'::regclass);
 
 
 --
