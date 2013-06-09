@@ -43,6 +43,10 @@ type TransactionCollection struct {
 	Transactions []*Transaction
 }
 
+func NewTransactionByFB(facebook_id int64, amount int64, description string) (*Transaction, error) {
+	u := UserFromFB(facebook_id)
+	return NewTransaction(u.Id, amount, description)
+}
 
 func NewTransaction(owner_id int64, amount int64, description string) (*Transaction, error ){
 	fmt.Printf("Creating transaction.\n")
