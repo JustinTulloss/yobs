@@ -264,7 +264,7 @@ func main() {
 	http.HandleFunc("/transactions", transactions)
 	http.HandleFunc("/transactions/new", new_transaction)
 
-	fmt.Printf("Listening...")
+	fmt.Printf("Listening on localhost:%s...", os.Getenv("PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
     if err != nil {
 		panic(err)
