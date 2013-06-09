@@ -1,4 +1,4 @@
-package yobs
+package main
 
 import (
 	"fmt"
@@ -106,4 +106,16 @@ func Users() *UserCollection {
 	user_collection := new(UserCollection)
 	user_collection.Users = users
 	return user_collection
+}
+
+func UserFromFB(facebook_id int64) *User {
+	db, _ := initDB()
+	stmt, _ := db.Prepare("SELECT id FROM users WHERE facebook_id = $1")
+	var id int64
+	stmt.QueryRow(facebook_id).Scan(&id)
+	user := new(User)
+	user.Id = id
+	user.Facebook_id = facebook_id
+	defer db.Close()
+	return user
 }

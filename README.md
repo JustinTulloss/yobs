@@ -12,6 +12,7 @@
 ## API endpoints
 
 * `/users`
+* `/users?facebook_id=1932106`
 * `/users/new?facebook_id=1932106`
 * `/transactions`
 * `/transactions/new?owner_id=4&amount=10000&description=foobar`

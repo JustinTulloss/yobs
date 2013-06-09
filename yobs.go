@@ -1,4 +1,4 @@
-package yobs
+package main
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ import (
 
 // HTTP handlers
 func new_user(res http.ResponseWriter, req *http.Request) {
-	db, _ := initDB()
 	params := req.URL.Query()
 	var facebook_id int64
 	facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
@@ -25,14 +24,24 @@ func new_user(res http.ResponseWriter, req *http.Request) {
 	user_json, _ := json.Marshal(user)
 	res.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(res, string(user_json))
-	defer db.Close()
 }
 
 func users(res http.ResponseWriter, req *http.Request) {
-	users := Users()
-	users_json, _ := json.Marshal(users)
 	res.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(res, string(users_json))
+	params := req.URL.Query()
+	if len(params["facebook_id"]) > 0 {
+		facebook_id_int, _ := strconv.Atoi(params["facebook_id"][0])
+		// facebook id is present
+		facebook_id := int64(facebook_id_int)
+		user := UserFromFB(facebook_id)
+		user_json, _ := json.Marshal(user)
+		fmt.Fprintf(res, string(user_json))
+	} else {
+		// no facebook id, give back all users
+		users := Users()
+		users_json, _ := json.Marshal(users)
+		fmt.Fprintf(res, string(users_json))
+	}
 }
 
 func transactions(res http.ResponseWriter, req *http.Request) {
@@ -71,7 +80,7 @@ func main() {
 	http.HandleFunc("/transactions", transactions)
 	http.HandleFunc("/transactions/new", new_transaction)
 
-	fmt.Printf("Listening on localhost:%s...", os.Getenv("PORT"))
+	fmt.Printf("Listening on localhost:%s...\n", os.Getenv("PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
     if err != nil {
 		panic(err)

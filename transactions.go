@@ -1,4 +1,4 @@
-package yobs
+package main
 
 import (
 	"fmt"
